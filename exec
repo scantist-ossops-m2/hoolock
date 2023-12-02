@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+const { bundleRequire } = require("bundle-require"),
+  { resolve } = require("path"),
+  fs = require("fs");
+(async () => {
+  const scriptName = process.argv[2],
+    scriptPath = resolve(
+      __dirname,
+      "bin",
+      /\.[tj]s$/.test(scriptName) ? scriptName : `${scriptName}.ts`
+    );
+
+  let { mod } = await bundleRequire({
+    filepath: scriptPath,
+    format: "cjs",
+  });
+
+  if ("default" in mod) mod = mod.default;
+
+  return mod();
+})().then(() => {
+  const args = process.argv.slice(2);
+  if (args.includes("--keep-cache") || args.includes("-kc")) return;
+  const cache = resolve(__dirname, ".cache");
+  try {
+    fs.rmSync(cache, { recursive: true });
+  } catch {}
+});
