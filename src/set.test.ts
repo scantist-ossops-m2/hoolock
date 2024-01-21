@@ -32,4 +32,37 @@ describe("set", () => {
     expect(result.a.b).toBeInstanceOf(Parent);
     expect(result.a.b.c).toBe(1);
   });
+
+  it("prevents prototype pollution", () => {
+    expect(() => set({}, "__proto__.polluted", true)).toThrow(
+      new TypeError(
+        'Property "__proto__" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(() =>
+      set(
+        {
+          a: {},
+        },
+        "a.__proto__.polluted",
+        true
+      )
+    ).toThrow(
+      new TypeError(
+        'Property "__proto__" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(() => set({}, "constructor.prototype", true)).toThrow(
+      new TypeError(
+        'Property "constructor" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(
+      // @ts-expect-error
+      {}.polluted
+    ).toBeUndefined();
+  });
 });

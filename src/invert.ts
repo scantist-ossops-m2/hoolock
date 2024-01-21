@@ -1,6 +1,7 @@
 import isPropertyKey from "./shared/isPropertyKey";
 
 import iterateProperties from "./shared/iterateProperties";
+import setSafeProperty from "./shared/setSafeProperty";
 import { FlattenIntersection, UnionToIntersection } from "./types";
 
 namespace Invert {
@@ -76,7 +77,11 @@ function invert<T extends Record<PropertyKey, unknown>>(source: T): Invert<T>;
 function invert(source: Record<PropertyKey, any>): Record<PropertyKey, any> {
   const result: Record<PropertyKey, any> = {};
   iterateProperties(source, (key, value) => {
-    if (isPropertyKey(value)) result[value] = key;
+    if (isPropertyKey(value)) {
+      setSafeProperty(result, value, {
+        value: key,
+      });
+    }
   });
   return result;
 }

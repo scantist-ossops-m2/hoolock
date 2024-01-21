@@ -1,6 +1,7 @@
 import isPropertyKey from "./isPropertyKey";
 import iterateProperties from "./iterateProperties";
 import returnInitialArgument from "./returnInitialArgument";
+import setSafeProperty from "./setSafeProperty";
 
 type Setter<T extends object = Record<PropertyKey, any>> = (
   target: T & Record<PropertyKey, any>,
@@ -57,13 +58,15 @@ export type TransformPropertyCreator<
 
 const arraySetter: Setter<any[]> = (target, value, key, keyOverride) => {
   if (isPropertyKey(keyOverride)) {
-    target[keyOverride] = value;
+    setSafeProperty(target, keyOverride, { value });
   } else {
     target.push(value);
   }
 };
 const objectSetter: Setter = (target, value, key, keyOverride) => {
-  target[isPropertyKey(keyOverride) ? keyOverride : key] = value;
+  setSafeProperty(target, isPropertyKey(keyOverride) ? keyOverride : key, {
+    value,
+  });
 };
 
 const ruleSave = (property: TransformProperty): TransformRule._ => ({

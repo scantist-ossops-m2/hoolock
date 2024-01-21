@@ -4,6 +4,8 @@ import deepClone from "./shared/deepClone";
 import cloneSimple from "./shared/cloneSimple";
 import iterateProperties from "./shared/iterateProperties";
 import type { Path, Mapped } from "./types";
+import setSafeProperty from "./shared/setSafeProperty";
+import isObjectLike from "./shared/isObjectLike";
 
 function omitRecursive(
   target: Mapped,
@@ -22,21 +24,20 @@ function omitRecursive(
       if (node.nodes) {
         // If it has nodes, then we only want to copy the
         // shape of the object, as it's children may be omitted
-        if (!(typeof value === "object" && value !== null)) {
+        if (!isObjectLike(value)) {
           // If it's not an object, then we cannot traverse down it.
           // Maybe copy the whole value instead here? Not sure.
           return;
         }
-        return omitRecursive(
-          (target[key] ??= emptyObjectFrom(value)),
-          value,
-          node.nodes,
-          clone
-        );
+
+        if (setSafeProperty(target, key, () => emptyObjectFrom(value)))
+          omitRecursive(target[key], value, node.nodes, clone);
+
+        return;
       }
     }
     // Otherwise, we can simply copy the entire value
-    target[key] = clone(value);
+    setSafeProperty(target, key, () => clone(value));
   });
 
   return target;

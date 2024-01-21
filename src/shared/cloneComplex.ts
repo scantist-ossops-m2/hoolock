@@ -5,7 +5,11 @@ import emptyObjectFrom from "./emptyObjectFrom";
 
 type Recurse = <T>(obj: T) => T;
 
-function create(source: Mapped, recurse: Recurse, cloned?: Visited): Mapped {
+function initializeClone(
+  source: Mapped,
+  recurse: Recurse,
+  cloned?: Visited
+): Mapped {
   if (source instanceof Set) {
     const target = new Set();
     if (cloned) cloned.set(source, target);
@@ -48,7 +52,7 @@ function cloneComplex(source: any, recurse: Recurse, cloned?: Visited) {
   if (isClonable(source)) {
     let target = cloned && cloned.get(source);
     if (target) return target;
-    target = create(source, recurse, cloned);
+    target = initializeClone(source, recurse, cloned);
     if (cloned) cloned.set(source, target);
     copyProperties(target, source, recurse);
     return target;

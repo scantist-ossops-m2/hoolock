@@ -1,8 +1,10 @@
 import cloneSimple from "./shared/cloneSimple";
 import deepClone from "./shared/deepClone";
 import emptyObjectFrom from "./shared/emptyObjectFrom";
+import isObjectLike from "./shared/isObjectLike";
 import iterateProperties from "./shared/iterateProperties";
 import pathTrie, { PathTrie } from "./shared/pathTrie";
+import setSafeProperty from "./shared/setSafeProperty";
 import type { Mapped, Path } from "./types";
 
 function pickRecursive(
@@ -16,23 +18,21 @@ function pickRecursive(
     if (node) {
       if (node.target) {
         // If the node is a target, then we want to copy the entire value
-        return (target[key] = clone(value));
+        return setSafeProperty(target, key, () => clone(value));
       }
       // Otherwise, check to see if the node has any children
       if (node.nodes) {
         // If it does, then we want to copy the shape of the object,
         // and traverse down to pick the children
-        if (!(typeof value === "object" && value !== null)) {
+        if (!isObjectLike(value)) {
           // If it's not an object, then we cannot traverse down it.
           // Maybe copy the whole value instead here? Not sure.
           return;
         }
-        return pickRecursive(
-          (target[key] ??= emptyObjectFrom(value)),
-          value,
-          node.nodes,
-          clone
-        );
+        if (setSafeProperty(target, key, () => emptyObjectFrom(value))) {
+          pickRecursive(target[key], value, node.nodes, clone);
+        }
+        return;
       }
     }
   });

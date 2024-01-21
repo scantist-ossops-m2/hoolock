@@ -1,3 +1,4 @@
+import setSafeProperty from "./shared/setSafeProperty";
 import targetPath from "./shared/targetPath";
 import type { Path } from "./types";
 
@@ -86,15 +87,15 @@ function update(
   updater: Updater<any>,
   createParent?: (() => object) | boolean
 ): any {
-  const { target, key, path } = targetPath(source, pathlike, createParent),
-    value = target[key];
-
-  target[key] = updater({
-    target,
-    path,
-    key,
-    value,
-  });
+  const { target, key, path } = targetPath(source, pathlike, createParent);
+  setSafeProperty(target, key, () =>
+    updater({
+      target,
+      path,
+      key,
+      value: target[key],
+    })
+  );
 
   return source;
 }
