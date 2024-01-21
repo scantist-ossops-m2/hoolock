@@ -53,4 +53,37 @@ describe("update", () => {
       },
     });
   });
+
+  it("prevents prototype pollution", () => {
+    expect(() => update({}, "__proto__.polluted", () => true)).toThrow(
+      new TypeError(
+        'Property "__proto__" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(() =>
+      update(
+        {
+          a: {},
+        },
+        "a.__proto__.polluted",
+        () => true
+      )
+    ).toThrow(
+      new TypeError(
+        'Property "__proto__" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(() => update({}, "constructor.prototype", () => true)).toThrow(
+      new TypeError(
+        'Property "constructor" does not belong to target object and cannot be accessed.'
+      )
+    );
+
+    expect(
+      // @ts-expect-error
+      {}.polluted
+    ).toBeUndefined();
+  });
 });

@@ -1,5 +1,6 @@
 import isArray from "./isArray";
 import isFunction from "./isFunction";
+import setSafeProperty from "./shared/setSafeProperty";
 
 type ShapeDynamicValues<K extends PropertyKey, T> = (key: K) => T;
 
@@ -49,7 +50,7 @@ function shape<T>(
   if (isArray(properties)) {
     const result: Record<string | number | symbol, T> = {};
     for (const property of properties) {
-      result[property] = generate(property);
+      setSafeProperty(result, property, () => generate(property));
     }
     return result;
   }

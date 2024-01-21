@@ -1,5 +1,5 @@
 import emptyObjectFrom from "./shared/emptyObjectFrom";
-import isSimpleObject from "./shared/isSimpleObject";
+import isSimpleObject from "./shared/isObjectLike";
 import transformObject, {
   TransformResult,
   TransformRule,

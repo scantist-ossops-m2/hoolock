@@ -1,4 +1,5 @@
 import type { AnyArray, Path } from "../types";
+import isOwnProperty from "./isOwnProperty";
 import toPath from "./toPath";
 
 export namespace PathTrie {
@@ -11,12 +12,25 @@ export interface PathTrie {
   [key: string | symbol]: PathTrie.Node;
 }
 
+const getNode = (
+  object: PathTrie,
+  key: PropertyKey
+): PathTrie.Node | undefined => {
+  if (key in object) {
+    if (!isOwnProperty(object, key)) return;
+    return object[key];
+  }
+  return (object[key] ??= {} as any);
+};
+
 const setNode = (trie: PathTrie, path: Array<string | symbol>) => {
   if (!path.length) return;
-  let node = (trie[path[0]] ??= {});
-  for (let i = 1; i < path.length; i++)
-    node = (node.nodes ??= {})[path[i]] ??= {};
-  node.target = true;
+  let node = getNode(trie, path[0]);
+  for (let i = 1; i < path.length; i++) {
+    if (!node) return;
+    node = getNode((node.nodes ??= {}), path[i]);
+  }
+  if (node) node.target = true;
 };
 
 const pathTrie = (pathlike: AnyArray<Path>): PathTrie => {

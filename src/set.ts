@@ -1,3 +1,4 @@
+import setSafeProperty from "./shared/setSafeProperty";
 import targetPath from "./shared/targetPath";
 import type { Path } from "./types";
 
@@ -73,7 +74,9 @@ function set(
   createParent?: (() => object) | boolean
 ): any {
   const { target, key } = targetPath(obj, path, createParent);
-  target[key] = value;
+  setSafeProperty(target, key, {
+    value,
+  });
   return obj;
 }
 

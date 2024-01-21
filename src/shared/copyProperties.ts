@@ -1,6 +1,7 @@
 import iterateProperties from "./iterateProperties";
 import returnInitialArgument from "./returnInitialArgument";
 import type { Mapped } from "../types";
+import setSafeProperty from "./setSafeProperty";
 
 /** Copies non-existant properties from a source object to a target object. */
 function copyProperties(
@@ -9,7 +10,7 @@ function copyProperties(
   recurse = returnInitialArgument
 ) {
   iterateProperties(from, (key, value) => {
-    if (!(key in to)) to[key] = recurse(value);
+    setSafeProperty(to, key, () => recurse(value));
   });
   return to;
 }
